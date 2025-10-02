@@ -1,0 +1,84 @@
+     <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>TEKA-TEKI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background-color: #f0f8ff;
+        }
+
+        h1 {
+            color: #2e8b57;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #246b45;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>TEKA-TEKI</h1>
+    <p><strong>Pertanyaan:</strong></p>
+    <p>"Aku adalah seekor hewan. Jumlah kakiku ada empat buah. Aku memiliki ekor. Aku juga memiliki belalai. Siapakah aku?"</p>
+
+    <input type="text" id="jawaban" placeholder="Tulis jawaban Anda di sini...">
+    <button onclick="cekJawaban()">Cek Jawaban</button>
+
+    <div class="feedback" id="feedback"></div>
+</div>
+
+<script>
+    function cekJawaban() {
+        const jawaban = document.getElementById("jawaban").value.trim().toLowerCase();
+        const feedback = document.getElementById("feedback");
+
+        if (jawaban === "gajah") {
+            feedback.style.color = "green";
+            feedback.innerText = "Jawaban Anda benar, hebat";
+        } else {
+            feedback.style.color = "red";
+            feedback.innerText = "Jawaban Anda salah, silahkan coba lagi.";
+        }
+    }
+</script>
+
+</body>
+</html>
