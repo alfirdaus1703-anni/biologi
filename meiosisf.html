@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Flipbook Meiosis - Lengkap</title>
+  <style>
+    :root{--bg:#000;--page:#fff;--muted:#444}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Roboto,Arial;color:#111}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+    .book{width:900px;max-width:100%;height:580px;background:transparent;position:relative;perspective:2000px}
+    .page{position:absolute;top:0;left:0;width:100%;height:100%;border-radius:10px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.6);transform-origin:left center;transition:transform 700ms cubic-bezier(.2,.9,.3,1),z-index 0ms linear 700ms}
+    .page .inner{height:100%;padding:28px;display:flex;flex-direction:column;background:var(--page);gap:12px}
+    .page h2{margin:0;color:#111}
+    .page p{color:#222;line-height:1.6}
+    .page img{max-width:100%;height:360px;object-fit:contain;border-radius:6px;border:1px solid #ddd}
+    .page[data-index="0"]{z-index:22}
+    .page[data-index="1"]{z-index:21}
+    .page[data-index="2"]{z-index:20}
+    .page[data-index="3"]{z-index:19}
+    .page[data-index="4"]{z-index:18}
+    .page[data-index="5"]{z-index:17}
+    .page[data-index="6"]{z-index:16}
+    .page[data-index="7"]{z-index:15}
+    .page[data-index="8"]{z-index:14}
+    .page[data-index="9"]{z-index:13}
+    .page[data-index="10"]{z-index:12}
+    .page[data-index="11"]{z-index:11}
+    .page[data-index="12"]{z-index:10}
+    .page[data-index="13"]{z-index:9}
+    .page[data-index="14"]{z-index:8}
+    .page[data-index="15"]{z-index:7}
+    .page[data-index="16"]{z-index:6}
+    .page[data-index="17"]{z-index:5}
+    .page[data-index="18"]{z-index:4}
+    .page[data-index="19"]{z-index:3}
+    .page.closed{transform:rotateY(0deg)}
+    .page.flipped{transform:rotateY(-180deg);z-index:1}
+    .controls{display:flex;gap:10px;justify-content:center;margin-top:12px}
+    button{background:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
+    .meta{color:#ddd;text-align:center;margin-top:8px}
+    .bullets{padding-left:18px}
+    /* last cover (orange) */
+    .cover-final .inner{background:linear-gradient(180deg,#ffcc80,#ff8a65);display:flex;align-items:center;justify-content:center;color:#111}
+    /* responsive */
+    @media (max-width:760px){.book{height:480px}.page img{height:250px}}
+    @media (max-width:420px){.book{height:420px}.page img{height:180px;padding:6px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div>
+      <div class="book" id="book">
+
+        <!-- 1 Cover -->
+        <div class="page closed" data-index="0">
+          <div class="inner">
+            <img src="https://alfirdaus1703-anni.github.io/biologi/cover%20bahan%20ajar%20.jpg" alt="Cover Meiosis">
+            <h2 style="text-align:center">Pembelahan Sel Meiosis</h2>
+            <p style="text-align:center;color:var(--muted);margin-top:4px;font-weight:600">Flipbook interaktif untuk pembelajaran (Responsive & cocok untuk Android)</p>
+          </div>
+        </div>
+
+        <!-- 2 Pengertian -->
+        <div class="page closed" data-index="1">
+          <div class="inner">
+            <h2>Pengertian Pembelahan Meiosis</h2>
+            <p>Pembelahan meiosis disebut juga pembelahan reduksi karena jumlah kromosom sel hasil pembelahan ini berkurang setengahnya.</p>
+          </div>
+        </div>
+
+        <!-- 3 Profase I (gambar) -->
+        <div class="page closed" data-index="2">
+          <div class="inner">
+            <h2>Profase I (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio1.jpg" alt="Profase I">
+            <p style="color:var(--muted)">Ilustrasi Profase I.</p>
+          </div>
+        </div>
+
+        <!-- 4 Profase I - fase -->
+        <div class="page closed" data-index="3">
+          <div class="inner">
+            <h2>Profase I - Tahapan</h2>
+            <ul class="bullets">
+              <li><strong>Leptonema (leptoten)</strong>: benang kromatin menjadi kromosom yang berbentuk seperti benang tunggal panjang.</li>
+              <li><strong>Zigonema (zigoten)</strong>: kromosom homolog berdekatan dan bergandengan (bivalen terbentuk).</li>
+              <li><strong>Pakinema (pakiten)</strong>: tiap bagian kromosom homolog mengganda tetapi masih dalam satu ikatan sentromer — terbentuk tetrad.</li>
+              <li><strong>Diplonema (diploten)</strong>: pasangan kromosom homolog saling merenggang tetapi terjadi perlekatan membentuk kiasma — terjadi pindah silang (crossing-over).</li>
+              <li><strong>Diakinesis</strong>: sentrosom membentuk sentriol yang bergerak ke kutub; nukleolus dan membran inti menghilang; tetrad terjerat oleh benang spindel.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 5 Metafase I (gambar) -->
+        <div class="page closed" data-index="4">
+          <div class="inner">
+            <h2>Metafase I (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio2.jpg" alt="Metafase I">
+            <p style="color:var(--muted)">Tetrad pada bidang ekuator.</p>
+          </div>
+        </div>
+
+        <!-- 6 Metafase I (teks) -->
+        <div class="page closed" data-index="5">
+          <div class="inner">
+            <h2>Metafase I - Penjelasan</h2>
+            <p>Tetrad berkumpul di bidang ekuator. Benang spindel melekat pada kinetokor sentromer. Benang spindel dari satu kutub hanya akan melekat pada salah satu kromosom homolog dari setiap tetrad, sedangkan dari kutub lain melekat pada kromosom homolog lainnya sehingga kromosom homolog tertarik ke kutub berlawanan.</p>
+          </div>
+        </div>
+
+        <!-- 7 Anafase I (gambar) -->
+        <div class="page closed" data-index="6">
+          <div class="inner">
+            <h2>Anafase I (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio3.jpg" alt="Anafase I">
+            <p style="color:var(--muted)">Pergerakan kromosom homolog menuju kutub.</p>
+          </div>
+        </div>
+
+        <!-- 8 Anafase I (teks) -->
+        <div class="page closed" data-index="7">
+          <div class="inner">
+            <h2>Anafase I - Pengertian</h2>
+            <p>Benang gelondong dari tiap kutub menarik kromosom homolog sehingga setiap pasangan kromosom homolog terpisah dan bergerak ke kutub yang berlawanan. Sentromer belum membelah pada fase ini.</p>
+          </div>
+        </div>
+
+        <!-- 9 Telofase I (gambar) -->
+        <div class="page closed" data-index="8">
+          <div class="inner">
+            <h2>Telofase I (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio4.jpg" alt="Telofase I">
+            <p style="color:var(--muted)">Akhir meiosis I dan pembentukan dua sel anak haploid.</p>
+          </div>
+        </div>
+
+        <!-- 10 Telofase I (teks) -->
+        <div class="page closed" data-index="9">
+          <div class="inner">
+            <h2>Telofase I - Pengertian</h2>
+            <p>Pada telofase I, kromosom berkumpul pada tiap kutub. Setiap kutub memiliki jumlah kromosom haploid (masih berbentuk dupleks dengan dua kromatid). Sitokinesis biasanya terjadi dan menghasilkan dua sel anak haploid; membran inti dan nukleolus terbentuk kembali, benang gelondong menghilang, dan kromatin muncul kembali.</p>
+          </div>
+        </div>
+
+        <!-- 11 Meiosis II (teks) -->
+        <div class="page closed" data-index="10">
+          <div class="inner">
+            <h2>Meiosis II</h2>
+            <p>Dua sel haploid hasil meiosis I memasuki meiosis II. Meiosis II mirip mitosis, tetapi dimulai dari sel haploid. Meiosis II terdiri dari profase II, metafase II, anafase II, dan telofase II.</p>
+          </div>
+        </div>
+
+        <!-- 12 Profase II (gambar) -->
+        <div class="page closed" data-index="11">
+          <div class="inner">
+            <h2>Profase II (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio5.jpg" alt="Profase II">
+            <p style="color:var(--muted)">Profase II: persiapan pembelahan kedu­a.</p>
+          </div>
+        </div>
+
+        <!-- 13 Profase II (teks) -->
+        <div class="page closed" data-index="12">
+          <div class="inner">
+            <h2>Profase II - Pengertian</h2>
+            <p>Sentrosom membentuk sepasang sentriol yang bergerak ke kutub berlawanan, membran inti dan nukleolus menghilang, kromatin memadat menjadi kromosom yang masih berdupleks (dua kromatid) dan terjerat oleh gelondong pembelahan.</p>
+          </div>
+        </div>
+
+        <!-- 14 Metafase II (gambar) -->
+        <div class="page closed" data-index="13">
+          <div class="inner">
+            <h2>Metafase II (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio6.jpg" alt="Metafase II">
+            <p style="color:var(--muted)">Kromosom pada bidang pembelahan.</p>
+          </div>
+        </div>
+
+        <!-- 15 Metafase II (teks) -->
+        <div class="page closed" data-index="14">
+          <div class="inner">
+            <h2>Metafase II - Pengertian</h2>
+            <p>Kromosom berkumpul pada bidang ekuator; benang spindel melekat pada kinetokor dan akan menarik pasangan kromatid menuju kutub berlawanan.</p>
+          </div>
+        </div>
+
+        <!-- 16 Anafase II (gambar) -->
+        <div class="page closed" data-index="15">
+          <div class="inner">
+            <h2>Anafase II (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio7.jpg" alt="Anafase II">
+            <p style="color:var(--muted)">Kromatid bergerak menuju kutub.</p>
+          </div>
+        </div>
+
+        <!-- 17 Anafase II (teks) -->
+        <div class="page closed" data-index="16">
+          <div class="inner">
+            <h2>Anafase II - Pengertian</h2>
+            <p>Sentromer kromatid saudara berpisah sehingga kromatid menjadi kromosom individual. Benang spindel menarik kromatid ke kutub berlawanan.</p>
+          </div>
+        </div>
+
+        <!-- 18 Telofase II (gambar) -->
+        <div class="page closed" data-index="17">
+          <div class="inner">
+            <h2>Telofase II (Gambar)</h2>
+            <img src="https://alfirdaus1703-anni.github.io/biologi/gambarmio8.jpg" alt="Telofase II">
+            <p style="color:var(--muted)">Pembentukan inti sel baru dan sitokinesis akhir.</p>
+          </div>
+        </div>
+
+        <!-- 19 Telofase II (teks) -->
+        <div class="page closed" data-index="18">
+          <div class="inner">
+            <h2>Telofase II - Pengertian</h2>
+            <p>Setiap kelompok kromatid berkumpul di kutub, berubah menjadi kromatin, membran inti dan nukleolus terbentuk kembali, dan sitokinesis menghasilkan sel-sel anak haploid — pada akhir dihasilkan empat sel haploid.</p>
+          </div>
+        </div>
+
+        <!-- 20 Final cover orange -->
+        <div class="page closed cover-final" data-index="19">
+          <div class="inner">
+            <div style="text-align:center">
+              <h2 style="font-size:32px">Akhir</h2>
+              <p style="margin-top:6px;font-weight:700;color:#222">Terima kasih — Selesai</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="controls">
+        <button id="prev">Sebelumnya</button>
+        <button id="next">Selanjutnya</button>
+        <button id="first">Awal</button>
+        <button id="last">Akhir</button>
+      </div>
+      <div class="meta" id="meta">Halaman 1 dari 20</div>
+    </div>
+  </div>
+
+  <script>
+    const pages = Array.from(document.querySelectorAll('.page'));
+    const total = pages.length;
+    let current = 0;
+    const meta = document.getElementById('meta');
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const firstBtn = document.getElementById('first');
+    const lastBtn = document.getElementById('last');
+
+    function updateMeta(){ meta.textContent = `Halaman ${current+1} dari ${total}`; }
+    function showPage(index){
+      index = Math.max(0,Math.min(index,total-1));
+      pages.forEach((p,i)=>{
+        if(i < index){ p.classList.add('flipped'); p.classList.remove('closed'); }
+        else { p.classList.remove('flipped'); p.classList.add('closed'); }
+      });
+      current = index; updateMeta();
+    }
+
+    prevBtn.addEventListener('click',()=> showPage(current-1));
+    nextBtn.addEventListener('click',()=> showPage(current+1));
+    firstBtn.addEventListener('click',()=> showPage(0));
+    lastBtn.addEventListener('click',()=> showPage(total-1));
+
+    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') showPage(current+1); if(e.key==='ArrowLeft') showPage(current-1); });
+
+    // touch support for android
+    let startX=0; const book = document.getElementById('book');
+    book.addEventListener('touchstart',(e)=> startX = e.changedTouches[0].clientX);
+    book.addEventListener('touchend',(e)=>{ const dx = e.changedTouches[0].clientX - startX; if(dx < -30) showPage(current+1); if(dx > 30) showPage(current-1); });
+
+    // initial
+    showPage(0);
+  </script>
+</body>
+</html>
