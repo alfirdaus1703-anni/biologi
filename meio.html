@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jodohkan Gambar dan Kata</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;padding:20px;background:#000;color:#fff}
+    h1{margin-top:0}
+    .container{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .card{background:#222;border-radius:8px;padding:8px;box-shadow:0 2px 6px rgba(0,0,0,.6);text-align:center}
+    img{max-width:100%;height:150px;object-fit:cover;border-radius:6px}
+    .words{margin:16px 0;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px}
+    .word{padding:6px 10px;border-radius:6px;background:#f2f2f2;border:1px solid #ddd;cursor:grab;user-select:none;color:#000}
+    textarea{width:100%;height:44px;margin-top:8px;padding:6px;border-radius:6px;border:1px dashed #bbb;resize:none;color:#000}
+    .controls{margin-top:18px;display:flex;gap:8px}
+    button{padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
+    button#hasil{background:#4caf50;color:white}
+    button#reset{background:#f44336;color:white}
+    #feedback{margin-top:12px;font-weight:700}
+    small.help{display:block;margin-top:8px;color:#ccc}
+  </style>
+</head>
+<body>
+  <h1>Jodohkan Gambar dan Kata</h1>
+  <p>Drag kata-kata ke kotak teks di bawah setiap gambar. Kata yang dipindah akan hilang dari daftar. Klik <strong>Hasil</strong> setelah selesai, atau <strong>Reset</strong> untuk mengulang.</p>
+
+  <!-- Audio elements -->
+  <audio id="suara1" src="https://alfirdaus1703-anni.github.io/biologi/suara1.mp3"></audio>
+  <audio id="suara2" src="https://alfirdaus1703-anni.github.io/biologi/suara2b.mp3"></audio>
+
+  <div class="words" id="wordBank" aria-label="Kata-kata">
+    <!-- words injected by script -->
+  </div>
+
+  <div class="container" id="grid">
+    <!-- image cards injected by script -->
+  </div>
+
+  <div class="controls">
+    <button id="hasil">Hasil</button>
+    <button id="reset">Reset</button>
+  </div>
+
+  <div id="feedback" role="status" aria-live="polite"></div>
+
+  <script>
+    // Data from user
+    const images = [
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio1.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio2.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio3.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio4.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio5.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio6.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio7.jpg',
+      'https://alfirdaus1703-anni.github.io/biologi/gambarmio8.jpg'
+    ];
+
+    const wordsOriginal = ['profase 1','metafase 1','anafase 1','telofase 1','profase 2','metafase 2','anafase 2','telofase2'];
+
+    const correctAnswers = ['profase 1','metafase 1','anafase 1','telofase 1','profase 2','metafase 2','anafase 2','telofase 2'];
+
+    function normalize(s){
+      return String(s||'').replace(/[^a-z0-9]/gi,'').toLowerCase();
+    }
+
+    const wordBank = document.getElementById('wordBank');
+    const grid = document.getElementById('grid');
+    const feedback = document.getElementById('feedback');
+    const suara1 = document.getElementById('suara1');
+    const suara2 = document.getElementById('suara2');
+    let started = false;
+
+    function createWordElement(text){
+      const span = document.createElement('div');
+      span.className='word';
+      span.draggable = true;
+      span.textContent = '['+text+']';
+      span.dataset.value = text;
+
+      span.addEventListener('dragstart',(ev)=>{
+        ev.dataTransfer.setData('text/plain', text);
+        if(!started){ started=true; try{suara1.play()}catch(e){} }
+      });
+      return span;
+    }
+
+    function renderWordBank(list){
+      wordBank.innerHTML='';
+      for(const w of list){
+        wordBank.appendChild(createWordElement(w));
+      }
+    }
+
+    function renderGrid(){
+      grid.innerHTML='';
+      images.forEach((src, idx)=>{
+        const card = document.createElement('div');card.className='card';
+        const img = document.createElement('img');img.src=src;img.alt='Gambar '+(idx+1);
+        const ta = document.createElement('textarea');
+        ta.placeholder = 'Drop kata di sini';
+        ta.dataset.index = idx;
+        ta.addEventListener('dragover',(e)=>{ e.preventDefault(); });
+        ta.addEventListener('drop',(e)=>{
+          e.preventDefault();
+          const val = e.dataTransfer.getData('text/plain');
+          if(!val) return;
+          const prev = ta.value.trim();
+          if(prev){ addWordToBank(prev); }
+          ta.value = val;
+          removeWordFromBank(val);
+        });
+
+        card.appendChild(img);
+        card.appendChild(ta);
+        grid.appendChild(card);
+      });
+    }
+
+    function removeWordFromBank(val){
+      const items = Array.from(wordBank.querySelectorAll('.word'));
+      for(const it of items){
+        if(normalize(it.dataset.value) === normalize(val)){
+          it.remove();
+          return;
+        }
+      }
+    }
+    function addWordToBank(val){
+      const exists = Array.from(wordBank.querySelectorAll('.word')).some(x=>normalize(x.dataset.value)===normalize(val));
+      if(!exists){ wordBank.appendChild(createWordElement(val)); }
+    }
+
+    renderWordBank(wordsOriginal);
+    renderGrid();
+
+    document.getElementById('hasil').addEventListener('click',()=>{
+      try{suara2.play()}catch(e){}
+
+      const taList = Array.from(document.querySelectorAll('textarea'));
+      let allCorrect = true;
+      for(const ta of taList){
+        const idx = parseInt(ta.dataset.index,10);
+        const given = ta.value.trim();
+        if(!given){ allCorrect=false; break; }
+        const expected = correctAnswers[idx];
+        if(normalize(given) !== normalize(expected)){
+          allCorrect = false; break;
+        }
+      }
+
+      if(allCorrect){
+        feedback.textContent = 'hebat jawaban anda benar';
+      } else {
+        feedback.textContent = 'Maaf Jawaban Anda Salah coba lagi';
+      }
+    });
+
+    document.getElementById('reset').addEventListener('click',()=>{
+      try{suara1.pause();suara1.currentTime=0}catch(e){}
+      try{suara2.pause();suara2.currentTime=0}catch(e){}
+      started=false;
+      feedback.textContent='';
+      renderWordBank(wordsOriginal);
+      document.querySelectorAll('textarea').forEach(ta=>ta.value='');
+    });
+
+    wordBank.addEventListener('click',(e)=>{
+      const w = e.target.closest('.word');
+      if(!w) return;
+      const val = w.dataset.value;
+      const empty = Array.from(document.querySelectorAll('textarea')).find(t=>!t.value.trim());
+      if(empty){ empty.value = val; w.remove(); if(!started){ started=true; try{suara1.play()}catch(e){} } }
+    });
+
+    grid.addEventListener('dblclick',(e)=>{
+      const ta = e.target.closest('textarea');
+      if(!ta) return;
+      const val = ta.value.trim();
+      if(val){ addWordToBank(val); ta.value=''; }
+    });
+
+    const help = document.createElement('small');
+    help.className='help';
+    help.textContent = 'Tip: Anda dapat menarik (drag) kata, atau klik kata untuk menempatkannya pada kotak teks kosong. Double-click pada kotak teks untuk mengembalikan kata ke daftar.';
+    document.body.insertBefore(help, document.querySelector('.words'));
+
+  </script>
+</body>
+</html>
