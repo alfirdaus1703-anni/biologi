@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Flipbook Meiosis</title>
+  <style>
+    :root{--page-width:360px; /* base for scaling */}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f3f4f6;margin:0;padding:20px}
+    /* container keeps page ratio 3:5 */
+    .frame{width:min(92vw,420px);aspect-ratio:3/5;position:relative;perspective:1400px}
+    .book{position:absolute;inset:0}
+    .page{
+      position:absolute;inset:0;background:white;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.12);overflow:hidden;transform-origin:left center;transform-style:preserve-3d;transition:transform 700ms cubic-bezier(.2,.9,.3,1),z-index 0s;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;backface-visibility:hidden
+    }
+    .page img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+    .page .text{font-size:clamp(12px,2.6vw,18px);line-height:1.45;color:#0f172a;text-align:left}
+    .page .center{display:flex;align-items:center;justify-content:center;height:100%}
+    /* stacked pages: first is top */
+    .page{z-index:var(--z,1)}
+    .page.turned{transform:rotateY(-180deg);z-index:0}
+    .page.back{transform:rotateY(-180deg);}
+    /* small page header */
+    .hdr{font-weight:600;margin-bottom:8px}
+    .pager{position:absolute;left:12px;bottom:10px;font-size:12px;color:#64748b}
+    /* controls: left and right clickable halves */
+    .hit-left,.hit-right{position:absolute;inset:0;z-index:9999}
+    .hit-left{left:0;right:50%;}
+    .hit-right{left:50%;right:0;}
+    .hint{position:absolute;right:12px;top:8px;font-size:12px;color:#94a3b8}
+    /* responsive text box for long paragraphs */
+    .text-block{overflow:auto;height:100%;padding-right:8px}
+    @media (max-width:420px){.frame{width:92vw}}
+  </style>
+</head>
+<body>
+  <div class="frame" id="frame">
+    <div class="book" id="book"></div>
+    <!-- touch/click zones -->
+    <div class="hit-left" id="hitLeft" aria-hidden="true"></div>
+    <div class="hit-right" id="hitRight" aria-hidden="true"></div>
+    <div class="hint">Ketuk kanan: berikutnya · kiri: sebelumnya</div>
+  </div>
+
+  <script>
+    // Pages data (ordered). Content texts are exactly as user provided (Indonesian).
+    const pages = [
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/cover%20bahan%20ajar%20.jpg', title:'Cover'},
+      {type:'text', title:'Pengertian Meiosis', html:`<div class="text-block"><p>Pembelahan meiosis disebut juga pembelahan reduksi karena jumlah kromosom sel hasil pembelahan ini berkurang setengahnya.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio1.jpg', title:'Profase I (gambar)'},
+      {type:'text', title:'Profase I — Fase', html:`<div class="text-block"><p>Pada profase I terdiri atas fase</p>
+<ul>
+<li><strong>Leptonema (leptoten)</strong>: benang kromatin menjadi kromosom yang berbentuk seperti benang tunggal panjang</li>
+<li><strong>Zigonema (zigoten)</strong>: kromosom homolog berdekatan dan bergandengan. Tiap pasang kromosom homolog disebut bivalen</li>
+<li><strong>Pakinema (pakiten)</strong>: tiap bagian kromosom homolog mengganda tapi masih dalam satu ikatan sentromer terbentuklah tetrad</li>
+<li><strong>Diplonema (diploten)</strong>: pasangan kromosom homolog saling merenggang tapi ada bagian dari kromosom homolog terjadi perlekatan/ saling menyilang membentuk kiasma. Pada kiasma terjadi pindah silang.</li>
+<li><strong>Diakinesis</strong>: sentrosom membentuk dua sentriol yang membentuk benang gelondong pembelahan, satu sentriol tetap yang lain bergerak ke kutub berlawanan. Nukleolus dan membran inti menghilang. Tetrad akan terjerat oleh benang spindel</li>
+</ul></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio2.jpg', title:'Metafase I (gambar)'},
+      {type:'text', title:'Metafase I', html:`<div class="text-block"><p>Tetrad berkumpul dibidang ekuator. Benang spindel melekat pada kinetokor sentromer. Benang spindel dari satu kutub hanya akan melekat pada salah satu kromosom homolog dari setiap tetrad. Benang spindel dari kutub lain akan melekat pada kromosom homolog lain dari tetrad tersebut. Dengan demikian, setiap kromosom dari pasangan kromosom homolog hanya dapat tertarik pada kutub yang berlawanan.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio3.jpg', title:'Anafase I (gambar)'},
+      {type:'text', title:'Anafase I', html:`<div class="text-block"><p>Benang gelondong pembelahan dari tiap kutub menarik kromosom homolog sehingga setiap pasangan kromosom homolog terpisah bergerak kearah kutub yang berlawanan, sentromer belum membelah.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio4.jpg', title:'Telofase I (gambar)'},
+      {type:'text', title:'Telofase I', html:`<div class="text-block"><p>Pada telofase I, kromosom berkumpul pada masing-masing kutub sel. Saat ini setiap kutub sel memiliki jumlah kromosom haploid dan kromosomnya masih dalam bentuk dupleks, dengan dua kromatid. Biasanya sitokinesis terjadi bersamaan dengan telofase I dan menghasilkan dua sel anak haploid. Kromatid memadat, selubung nukleus terbentuk lagi, nukleolus ada lagi dan terjadilah sitokinesis, benang gelondong menghilang, sentriol berperan sebagai sentrosom lagi, kromatin muncul.</p></div>`},
+      {type:'text', title:'Meiosis II', html:`<div class="text-block"><p>Dua sel haploid hasil meiosis I sekarang memasuki meisosis II. Terdapat perbedaan dalam siklus sel meiosis II ini. Meiosis II terdiri dari tahapan profase II, metafase II, anaphase II dan telofase II.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio5.jpg', title:'Profase II (gambar)'},
+      {type:'text', title:'Profase II', html:`<div class="text-block"><p>Sentrosom terbentuk 2 sentriol yang bergerak kearah kutub berlawanan yang dihubungkan dengan benang-benang gelondong, membran inti dan nukleolus hilang. Kromatin berubah menjadi kromosom yang terjerat oleh gelondong pembelahan. Kromosom yang terbentuk masih dalam keadaan dupleks, dengan dua kromatid.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio6.jpg', title:'Metafase II (gambar)'},
+      {type:'text', title:'Metafase II', html:`<div class="text-block"><p>Kromosom mengumpul kembali pada bidang pembelahan dengan bantuan benang-benang spindel. Benang-benang spindel ini melekat pada kinetokor yang nantinya akan menarik pasangan kromatid menuju kutub yang berlawanan.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio7.jpg', title:'Anafase II (gambar)'},
+      {type:'text', title:'Anafase II', html:`<div class="text-block"><p>Sentromer kromatid saudara berpisah sehingga kromatid tersebut menjadi kromosom individual, benang spindel menarik kromatid kearah kutub yang berlawanan.</p></div>`},
+      {type:'img', src:'https://alfirdaus1703-anni.github.io/biologi/gambarmio8.jpg', title:'Telofase II (gambar)'},
+      {type:'text', title:'Telofase II', html:`<div class="text-block"><p>Kromatid berkumpul pada kutub pembelahan lalu berubah menjadi kromatin kembali, terbentuk nukleolus dan membran inti. Setiap inti dipisahkan oleh sekat pembelahan, terjadilah sitokinesis, akhir sitokinesis dihasilkan 4 kromosom yang haploid.</p></div>`},
+      {type:'cover', title:'Penutup', html:`<div class="center"><h2 style="color:white;background:#fb923c;padding:18px;border-radius:8px">Terima kasih</h2></div>`, style:{background:'#fb923c',color:'#fff'}}
+    ];
+
+    const book = document.getElementById('book');
+
+    // create page elements stacked so index 0 is bottom and last is top to flip from first to last
+    // but we want cover first visible, so we put pages in reverse order so pages[0] is top-most initially
+    const elems = [];
+    for(let i=pages.length-1;i>=0;i--){
+      const p = pages[i];
+      const el = document.createElement('section');
+      el.className='page';
+      el.style.setProperty('--z', pages.length - i);
+      el.dataset.idx = i;
+      if(p.type==='img'){
+        el.innerHTML = `<div class="center"><img src="${p.src}" alt="${p.title}"/></div><div class="pager">Halaman ${i+1}/${pages.length}</div>`
+      } else if(p.type==='text' || p.type==='cover'){
+        el.innerHTML = `<div class="hdr">${p.title}</div><div class="text">${p.html}</div><div class="pager">Halaman ${i+1}/${pages.length}</div>`
+        if(p.style && p.style.background){ el.style.background = p.style.background; el.style.color = p.style.color || '#fff' }
+      } else {
+        el.innerHTML = `<div class="center">${p.html}</div><div class="pager">Halaman ${i+1}/${pages.length}</div>`
+      }
+      book.appendChild(el);
+      elems[i]=el;
+    }
+
+    // state: current top page index (0-based for pages array). Initially 0 (cover)
+    let cur = 0;
+    function showState(){
+      // pages with index < cur should have class 'turned'
+      pages.forEach((_,i)=>{
+        const el = elems[i];
+        if(!el) return;
+        if(i < cur) {
+          el.classList.add('turned');
+        } else {
+          el.classList.remove('turned');
+        }
+        // ensure stacking order: higher indexes appear on top when not turned
+        el.style.zIndex = ( (i < cur) ? 0 : (1000 - i) );
+      });
+    }
+    showState();
+
+    function next(){ if(cur < pages.length-1){ cur++; showState(); } }
+    function prev(){ if(cur > 0){ cur--; showState(); } }
+
+    // click zones
+    const hitLeft = document.getElementById('hitLeft');
+    const hitRight = document.getElementById('hitRight');
+    hitRight.addEventListener('click', (e)=>{ next(); });
+    hitLeft.addEventListener('click', (e)=>{ prev(); });
+
+    // also support swipe gestures for Android / touch
+    let startX=null;
+    const frame = document.getElementById('frame');
+    frame.addEventListener('touchstart', e=>{ if(e.touches && e.touches[0]) startX = e.touches[0].clientX });
+    frame.addEventListener('touchend', e=>{ if(startX==null) return; const endX = (e.changedTouches && e.changedTouches[0])? e.changedTouches[0].clientX : null; if(endX==null) return; const dx = endX - startX; if(Math.abs(dx) > 30){ if(dx < 0) next(); else prev(); } startX=null });
+
+    // allow keyboard for desktop testing
+    window.addEventListener('keydown', (e)=>{ if(e.key==='ArrowRight') next(); if(e.key==='ArrowLeft') prev(); });
+
+    // accessibility: announce page changes
+    const live = document.createElement('div'); live.setAttribute('aria-live','polite'); live.style.position='absolute'; live.style.left='-9999px'; document.body.appendChild(live);
+    const observer = new MutationObserver(()=>{ live.textContent = `Halaman ${cur+1} dari ${pages.length}: ${pages[cur].title || ''}` });
+    observer.observe(book, {subtree:true,childList:true,characterData:true});
+
+    // ensure images scale and fit; preloading images to improve Android experience
+    pages.forEach(p=>{ if(p.src){ const im=new Image(); im.src=p.src } });
+
+    // initial announcement
+    setTimeout(()=>{ live.textContent = `Halaman 1 dari ${pages.length}: ${pages[0].title || ''}` },600);
+
+  </script>
+</body>
+</html>
