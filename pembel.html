@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flipbook - Pembelahan Meiosis</title>
+  <style>
+    :root{
+      --bg:#FFDDBA; /* orange muda */
+      --accent:#FFA04D; /* cover akhir */
+      --page-radius:12px;
+      --ratio-w:3;
+      --ratio-h:5;
+    }
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;background:var(--bg);}
+
+    /* Center the flipbook for mobile (Android) */
+    .stage{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      box-sizing:border-box;
+    }
+
+    /* Maintain 3:5 aspect ratio using intrinsic ratio technique */
+    .frame{
+      width:92vw;
+      max-width:520px;
+      position:relative;
+      box-sizing:border-box;
+      perspective:1600px;
+    }
+    .frame:before{
+      content:"";
+      display:block;
+      padding-top: calc( (var(--ratio-h) / var(--ratio-w)) * 100% ); /* 5/3 */
+    }
+
+    /* actual book area positioned absolutely inside the ratio box */
+    .book{
+      position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    }
+
+    .page{
+      position:absolute;left:50%;top:50%;transform-style:preserve-3d;transform-origin:left center;
+      width:90%;height:90%;max-width:calc(520px * 0.9);
+      max-height:calc( (520px * (var(--ratio-h)/var(--ratio-w))) * 0.9 );
+      background:var(--bg);
+      border-radius:var(--page-radius);
+      box-shadow:0 18px 40px rgba(0,0,0,0.18);
+      overflow:hidden;
+      display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px;
+      transform:translate(-50%,-50%);
+      transition:transform 800ms cubic-bezier(.2,.9,.3,1), z-index 0s 800ms;
+      backface-visibility:hidden;
+      cursor:pointer;
+    }
+
+    /* content styling */
+    .page img{max-width:88%;height:auto;border-radius:8px;margin-bottom:10px;display:block}
+    h1,h2{margin:6px 0 10px 0;text-align:center}
+    p,ul{margin:6px 0;font-size:15px;line-height:1.45}
+    ul{padding-left:18px}
+
+    /* flipped (left) pages */
+    .page.flipped{transform:translate(-50%,-50%) rotateY(-180deg);z-index:0;transition:transform 800ms cubic-bezier(.2,.9,.3,1)}
+    .page.current{z-index:60;transition:transform 800ms cubic-bezier(.2,.9,.3,1)}
+
+    /* stack ordering for pages (later pages on top) */
+    /* We'll assign z-index by JS dynamically for correct stacking */
+
+    /* small page number */
+    .pnum{position:absolute;right:12px;bottom:8px;font-size:12px;color:#6a4b2a}
+
+    /* last page (final cover) different color */
+    .page.final{background:var(--accent);color:white}
+
+    /* responsive typography */
+    @media(min-width:420px){
+      p,ul{font-size:15px}
+    }
+    @media(max-width:360px){
+      p,ul{font-size:13px}
+    }
+
+    /* subtle hint */
+    .hint{position:fixed;left:14px;bottom:14px;font-size:13px;color:#6a4b2a;background:rgba(255,255,255,0.6);padding:8px 10px;border-radius:10px}
+
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <div class="frame" id="flip-frame" role="application" aria-label="Flipbook Pembelahan Meiosis">
+      <div class="book" id="book"></div>
+    </div>
+  </div>
+  <div class="hint">Ketuk halaman untuk lanjut • Geser kiri/kanan juga bisa</div>
+
+  <script>
+    /* Data untuk halaman sesuai permintaan user (bahasa & gambar) */
+    const pages = [
+      {type:'cover', title:'', image:'https://alfirdaus1703-anni.github.io/biologi/cover%20bahan%20ajar%20.jpg', note:'Cover'},
+      {title:'Pengertian Pembelahan Meiosis', text:`Pembelahan meiosis disebut juga pembelahan reduksi karena jumlah kromosom sel hasil pembelahan ini berkurang setengahnya.`},
+      {title:'Profase I', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio1.jpg', html:`<strong>Pada profase I terdiri atas fase</strong><ul><li><strong>Leptonema (leptoten):</strong> benang kromatin menjadi kromosom yang berbentuk seperti benang tunggal panjang</li><li><strong>Zigonema (zigoten):</strong> kromosom homolog berdekatan dan bergandengan. Tiap pasang kromosom homolog disebut bivalen</li><li><strong>Pakinema (pakiten):</strong> tiap bagian kromosom homolog mengganda tapi masih dalam satu ikatan sentromer terbentuklah tetrad</li><li><strong>Diplonema (diploten):</strong> pasangan kromosom homolog saling merenggang tapi ada bagian dari kromosom homolog terjadi perlekatan/ saling menyilang membentuk kiasma. Pada kiasma terjadi pindah silang.</li><li><strong>Diakinesis:</strong> sentrosom membentuk dua sentriol yang membentuk benang gelondong pembelahan, satu sentriol tetap yang lain bergerak ke kutub berlawanan. Nukleolus dan membran inti menghilang. Tetrad akan terjerat oleh benang spindel</li></ul>`},
+      {title:'Metafase I', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio2.jpg', text:`Tetrad berkumpul di bidang ekuator. Benang spindel melekat pada kinetokor sentromer. Benang spindel dari satu kutub hanya akan melekat pada salah satu kromosom homolog dari setiap tetrad. Benang spindel dari kutub lain akan melekat pada kromosom homolog lain dari tetrad tersebut. Dengan demikian, setiap kromosom dari pasangan kromosom homolog hanya dapat tertarik pada kutub yang berlawanan.`},
+      {title:'Anafase I', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio3.jpg', text:`Benang gelondong pembelahan dari tiap kutub menarik kromosom homolog sehingga setiap pasangan kromosom homolog terpisah bergerak ke arah kutub yang berlawanan. Sentromer belum membelah.`},
+      {title:'Telofase I', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio4.jpg', text:`Pada telofase I, kromosom berkumpul pada masing-masing kutub sel. Saat ini setiap kutub sel memiliki jumlah kromosom haploid dan kromosomnya masih dalam bentuk dupleks, dengan dua kromatid. Biasanya sitokinesis terjadi bersamaan dengan telofase I dan menghasilkan dua sel anak haploid. Kromatid memadat, selubung nukleus terbentuk lagi, nukleolus ada lagi dan terjadilah sitokinesis, benang gelondong menghilang.`},
+      {title:'Meiosis II', text:`Dua sel haploid hasil meiosis I sekarang memasuki meiosis II. Terdapat perbedaan dalam siklus sel meiosis II ini. Meiosis II terdiri dari tahapan profase II, metafase II, anafase II dan telofase II.`},
+      {title:'Profase II', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio5.jpg', text:`Sentrosom terbentuk 2 sentriol yang bergerak ke arah kutub berlawanan yang dihubungkan dengan benang-benang gelondong, membran inti dan nukleolus hilang. Kromatin berubah menjadi kromosom yang terjerat oleh gelondong pembelahan. Kromosom yang terbentuk masih dalam keadaan dupleks, dengan dua kromatid.`},
+      {title:'Metafase II', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio6.jpg', text:`Kromosom mengumpul kembali pada bidang pembelahan dengan bantuan benang-benang spindel. Benang-benang spindel ini melekat pada kinetokor yang nantinya akan menarik pasangan kromatid menuju kutub yang berlawanan.`},
+      {title:'Anafase II', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio7.jpg', text:`Sentromer kromatid saudara berpisah sehingga kromatid tersebut menjadi kromosom individual, benang spindel menarik kromatid ke arah kutub yang berlawanan.`},
+      {title:'Telofase II', image:'https://alfirdaus1703-anni.github.io/biologi/gambarmio8.jpg', text:`Kromatid berkumpul pada kutub pembelahan lalu berubah menjadi kromatin kembali, terbentuk nukleolus dan membran inti. Setiap inti dipisahkan oleh sekat pembelahan, terjadilah sitokinesis, akhir sitokinesis dihasilkan 4 kromosom yang haploid.`},
+      {type:'final', title:'-- Penutup --', text:'Terima kasih — Selesai', final:true}
+    ];
+
+    const bookEl = document.getElementById('book');
+    let current = 0; // halaman yang sedang dibaca (index)
+
+    // create page elements (stacked). We create from last to first so first page on top in DOM
+    for(let i=pages.length-1;i>=0;i--){
+      const pdata = pages[i];
+      const pg = document.createElement('article');
+      pg.className = 'page';
+      pg.dataset.index = i;
+      if(pdata.final) pg.classList.add('final');
+
+      // content
+      if(pdata.image){
+        const img = document.createElement('img');
+        img.src = pdata.image;
+        img.alt = pdata.title || 'Gambar';
+        pg.appendChild(img);
+      }
+      if(pdata.title){
+        const h = document.createElement('h2'); h.textContent = pdata.title; pg.appendChild(h);
+      }
+      if(pdata.html){
+        const div = document.createElement('div'); div.innerHTML = pdata.html; pg.appendChild(div);
+      } else if(pdata.text){
+        const p = document.createElement('p'); p.textContent = pdata.text; pg.appendChild(p);
+      }
+      // small page number
+      const num = document.createElement('div'); num.className='pnum'; num.textContent = i+1 + '/' + pages.length; pg.appendChild(num);
+
+      // set initial position and stacking using z-index
+      pg.style.zIndex = i; // lower index deeper
+
+      // click to advance only if page index <= current (i.e. already visible/read)
+      pg.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        // only advance if this page is the current page (the one on top and readable)
+        if(Number(pg.dataset.index) === current){
+          goNext();
+        }
+      });
+
+      bookEl.appendChild(pg);
+    }
+
+    // update visual state
+    function refresh(){
+      const pageEls = Array.from(document.querySelectorAll('.page'));
+      pageEls.forEach(el=>{
+        const idx = Number(el.dataset.index);
+        if(idx < current){
+          el.classList.add('flipped');
+          el.classList.remove('current');
+          // move slightly left when flipped
+          el.style.transform = 'translate(-50%,-50%) rotateY(-180deg) translateX(-6%)';
+        } else if(idx === current){
+          el.classList.remove('flipped');
+          el.classList.add('current');
+          el.style.transform = 'translate(-50%,-50%)';
+          el.style.zIndex = pages.length + 20;
+        } else {
+          el.classList.remove('flipped');
+          el.classList.remove('current');
+          // move slightly right for pages ahead so they appear stacked
+          const shift = (idx - current) * 6;
+          el.style.transform = `translate(-50%,-50%) translateX(${shift}%)`;
+          el.style.zIndex = pages.length - idx;
+        }
+      });
+    }
+
+    function goNext(){
+      if(current < pages.length-1){
+        current++;
+        refresh();
+      } else {
+        // already on last page - optionally loop back to cover
+        current = 0; refresh();
+      }
+    }
+    function goPrev(){
+      if(current > 0){ current--; refresh(); }
+    }
+
+    // gestures: simple swipe detection
+    let startX=null;
+    const frame = document.getElementById('flip-frame');
+    frame.addEventListener('touchstart', (e)=>{ startX = e.changedTouches[0].clientX; }, {passive:true});
+    frame.addEventListener('touchend', (e)=>{
+      if(startX===null) return; const dx = e.changedTouches[0].clientX - startX; if(Math.abs(dx) < 30) return; if(dx < 0) goNext(); else goPrev(); startX=null;
+    });
+
+    // allow clicking empty frame to advance too (as "klik halaman yang telah terbaca")
+    frame.addEventListener('click', (e)=>{
+      // find topmost page element - the one with dataset.index === current
+      const top = document.querySelector('.page[data-index="'+current+'"]');
+      // if click target is the top page itself (or frame) then advance
+      if(e.target === top || e.target === frame || e.target.closest('.page') === top){
+        goNext();
+      }
+    });
+
+    // keyboard
+    window.addEventListener('keydown',(e)=>{ if(e.key==='ArrowRight') goNext(); if(e.key==='ArrowLeft') goPrev(); });
+
+    // initial render
+    refresh();
+
+    // ensure images fit well on small screens by lazy adjusting image max-height
+    window.addEventListener('resize', ()=>{
+      const imgs = document.querySelectorAll('.page img');
+      imgs.forEach(img=>{
+        // limit image height to 48% of frame height
+        img.style.maxHeight = (document.querySelector('.frame').clientHeight * 0.48) + 'px';
+      });
+    });
+    // trigger resize once
+    window.dispatchEvent(new Event('resize'));
+
+  </script>
+</body>
+</html>
